@@ -9,11 +9,6 @@ i3conn = i3ipc.Connection()
 global i3mode
 i3mode = "default"
 mutex = Lock()
-# name
-global pos
-pos = 0
-global prev_name
-prev_name = ""
 
 # TODO: do as segment class
 
@@ -42,13 +37,13 @@ class WindowNameSegment(KwThreadedSegment):
         if len(new_name) < max_length:
             self.pos = 0
         else:
-            self.pos = (self.pos + 2) % len(new_name)
+            self.pos = (self.pos + int(max_length * 0)) % len(new_name)
         if self.prev_name != new_name:
             self.prev_name = new_name
             self.pos = 0
         rotated_name = new_name[self.pos:] + new_name[:self.pos]
         rotated_shortened_name = rotated_name[:max_length]
-        return ("{0:" + str(max_length) + "}").format(rotated_shortened_name)
+        return ("{0:^" + str(max_length) + "}").format(rotated_shortened_name)
 
     def render_one(self, name, **kwargs):
         if name is None:
@@ -66,10 +61,12 @@ window_name = with_docstring(WindowNameSegment(),
 
 ''')
 
-def mode(pl):
+def mode(pl, hidden_modes=[]):
     mutex.acquire()
     mode = i3mode
     mutex.release()
+    if mode in hidden_modes:
+        return None
     return [{
         "contents": mode,
         "highlight_groups": ["mode"]
