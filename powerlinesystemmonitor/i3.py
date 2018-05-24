@@ -58,15 +58,21 @@ window_name = with_docstring(WindowNameSegment(),
 
 :param max_length:
     maximum length of window name
+:param hidden_modes:
+    modes that shall not be displayed
+:param rename_modes:
+    rename i3 modes using a map from i3 mode name -> display text
 
 ''')
 
-def mode(pl, hidden_modes=[]):
+def mode(pl, hidden_modes=[], rename_modes={}):
     mutex.acquire()
     mode = i3mode
     mutex.release()
     if mode in hidden_modes:
         return None
+    if mode in rename_modes.keys():
+        mode = rename_modes[mode]
     return [{
         "contents": mode,
         "highlight_groups": ["mode"]
